@@ -8,6 +8,8 @@ def menu():
         print("1. Cadastrar Cliente")
         print("2. Listar Skins")
         print("3. Registrar Compra")
+        print("4. Cadastrar nova skin")
+        print("5. Atualizar skin")
         print("0. Sair")
         
         opcao = input("Escolha uma opção: ")
@@ -38,7 +40,16 @@ def menu():
            
             
             # Chama a função que acabámos de criar
-            skins.inserir_skin(nome, estado, raridade, pattern, wear)    
+            skins.inserir_skin(nome, estado, raridade, pattern, wear)
+        elif opcao == '5':
+            print("\n--- ATUALIZAR SKIN ---")
+            nome = input("Nome da Skin (Ex: AK-47 Redline): ")
+            estado = input("Estado (Ex: Field-Tested): ")
+            raridade = input("Raridade (Ex: Classified): ")
+            pattern = int(input("Pattern (Número inteiro): "))
+            wear = float(input("Wear Rating (Ex: 0.15): "))
+
+            skins.atualizar_skin(nome, estado, raridade, pattern, wear)
         else:
             print("Opção inválida.")
 

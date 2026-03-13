@@ -23,7 +23,31 @@ def inserir_skin(nome, estado, raridade, pattern, wear_rating):
         finally:
             cursor.close()
             conn.close()
-            
+
+def atualizar_skin(nome, estado, raridade, pattern, wear_rating):
+    conn = get_conexao()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            sql = """
+                UPDATE INTO Skins(nome, estado, raridade, pattern, wear_rating)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            valores = (nome, estado, raridade, pattern, wear_rating)
+
+            cursor.execute(sql, valores)
+            conn.commit()
+
+            print(f"\n Valores atualizados!")
+        
+        except Exception as e:
+                print("\nErro ao atualizar os valores.")
+                conn.rollback()
+        
+        finally:
+            cursor.close()
+            conn.close()
+
 def listar_skins():
     conn = get_conexao()
     if conn:
