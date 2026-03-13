@@ -60,12 +60,13 @@ def menu_skins():
             print("\n--- CADASTRAR NOVA SKIN ---")
 
             nome = input("Nome da Skin: ")
+            valor = float(input("Valor (R$): "))
             estado = input("Estado: ")
             raridade = input("Raridade: ")
             pattern = int(input("Pattern: "))
             wear = float(input("Wear Rating: "))
 
-            skins.inserir_skin(nome, estado, raridade, pattern, wear)
+            skins.inserir_skin(nome, valor, estado, raridade, pattern, wear)
 
         elif opcao == '3':
             print("\n--- ATUALIZAR SKIN ---")
@@ -76,12 +77,14 @@ def menu_skins():
                 id_atualizar = int(input("Qual ID deseja atualizar? "))
 
                 nome = input("Nome da Skin: ")
+                valor = float(input("Valor (R$): "))
                 estado = input("Estado: ")
                 raridade = input("Raridade: ")
                 pattern = int(input("Pattern: "))
                 wear = float(input("Wear Rating: "))
+                
 
-                skins.atualizar_skin(id_atualizar, nome, estado, raridade, pattern, wear)
+                skins.atualizar_skin(id_atualizar, nome, valor, estado, raridade, pattern, wear)
 
             except ValueError:
                 print("Erro: ID inválido.")
@@ -103,7 +106,16 @@ def menu_skins():
 
             except ValueError:
                 print("Erro: ID inválido.")
+        elif opcao == '5': 
+            nome_busca = input("\nDigite o nome (ou parte do nome) da skin: ")
+            skins.pesquisar_skin_por_nome(nome_busca)
 
+        elif opcao == '6': 
+            try:
+                id_busca = int(input("\nDigite o ID exato da skin para ver detalhes: "))
+                skins.exibir_uma_skin(id_busca)
+            except ValueError:
+                print(" Erro: Insira um número de ID válido.")
         else:
             print("Opção inválida.")
 
