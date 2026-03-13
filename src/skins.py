@@ -19,26 +19,30 @@ def inserir_skin(nome, estado, raridade, pattern, wear_rating):
         except Exception as e:
             print(f"\nErro ao inserir a skin: {e}")
             conn.rollback()
-            
+             
         finally:
             cursor.close()
             conn.close()
 
-def atualizar_skin(nome, estado, raridade, pattern, wear_rating):
+def atualizar_skin(id, nome, estado, raridade, pattern, wear_rating):
     conn = get_conexao()
     if conn:
         try:
             cursor = conn.cursor()
             sql = """
-                UPDATE INTO Skins(nome, estado, raridade, pattern, wear_rating)
-                VALUES (%s, %s, %s, %s, %s)
+                UPDATE Skins SET nome = %s, estado = %s, raridade = %s, pattern = %s, wear_rating = %s 
+                WHERE id_skins = id
             """
-            valores = (nome, estado, raridade, pattern, wear_rating)
+            valores = (nome, estado, raridade, pattern, wear_rating, id)
 
             cursor.execute(sql, valores)
-            conn.commit()
 
-            print(f"\n Valores atualizados!")
+            if cursor.rowcount > 0:
+                print(f"\n ID {id} atualizado!")
+            else:
+                print(f"\n Nenhuma skin encontrada com ID: {id}")
+
+            conn.commit()
         
         except Exception as e:
                 print("\nErro ao atualizar os valores.")
@@ -55,8 +59,14 @@ def listar_skins():
             cursor = conn.cursor()
             cursor.execute("SELECT id_skins, nome, estado FROM Skins;")
             skins = cursor.fetchall()
-            for skin in skins:
-                print(f"ID: {skin[0]} | Nome: {skin[1]} | Estado: {skin[2]}")
+
+            if len(skins) == 0:
+                print(f"Nenhuma Skin listada")
+            
+            else:
+                for skin in skins:
+                    print(f"ID: {skin[0]} | Nome: {skin[1]} | Estado: {skin[2]}")
+
         except Exception as e:
             print(f"Erro ao listar skins: {e}")
         finally:

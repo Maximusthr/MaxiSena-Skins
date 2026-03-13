@@ -1,6 +1,7 @@
 CREATE TABLE Skins ( 
     id_skins                      SERIAL,
     nome                          VARCHAR(40) NOT NULL,
+    valor                         FLOAT NOT NULL,
     estado                        VARCHAR(40) NOT NULL,
     raridade                      VARCHAR(40) NOT NULL,
     pattern                       INTEGER NOT NULL,
@@ -23,7 +24,7 @@ CREATE TABLE Compras (
     id_cliente                    INTEGER NOT NULL,
     id_skins                      INTEGER NOT NULL,
     data_compra                   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    valor                         FLOAT NOT NULL,
+    valor_final                   FLOAT NOT NULL, 
 
     PRIMARY KEY (id_compra),
     FOREIGN KEY (id_cliente) REFERENCES Clientes (id_cliente),
