@@ -52,23 +52,38 @@ def atualizar_skin(id, nome, valor, estado, raridade, pattern, wear_rating):
             cursor.close()
             conn.close()
 
-def listar_skins():
+def listar_skins(tipo_ordem):
     conn = get_conexao()
     if conn:
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT id_skins, nome, estado FROM Skins;")
+
+            if tipo_ordem == "crescente":
+                query = "SELECT id_skins, nome, valor, estado FROM Skins ORDER BY valor ASC"
+
+            elif tipo_ordem == "decrescente":
+                query = "SELECT id_skins, nome, valor, estado  FROM Skins ORDER BY valor DESC"
+
+            else:  
+                query = "SELECT id_skins, nome, valor, estado FROM Skins ORDER BY id_skins ASC"
+
+            cursor.execute(query)
             skins = cursor.fetchall()
 
             if len(skins) == 0:
-                print(f"Nenhuma Skin listada")
-            
+                print("\nNenhuma skin cadastrada.")
+
             else:
+                print("\n===== LISTA DE SKINS =====")
+
                 for skin in skins:
-                    print(f"ID: {skin[0]} | Nome: {skin[1]} | Estado: {skin[2]}")
+                    print(f"ID: {skin[0]} | Nome: {skin[1]} | Preço: {skin[2]} | Estado: {skin[3]}")
+
+                gerar_relatorio(cursor)
 
         except Exception as e:
             print(f"Erro ao listar skins: {e}")
+
         finally:
             cursor.close()
             conn.close()
@@ -145,3 +160,32 @@ def exibir_uma_skin(id_skin):
         finally:
             cursor.close()
             conn.close()
+
+def gerar_relatorio(cursor):
+
+    cursor.execute("SELECT SUM(valor) FROM Skins")
+    total = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT nome, valor
+        FROM Skins
+        ORDER BY valor DESC
+        LIMIT 1
+    """)
+    mais_cara = cursor.fetchone()
+
+    cursor.execute("""
+        SELECT nome, valor
+        FROM Skins
+        ORDER BY valor ASC
+        LIMIT 1
+    """)
+    mais_barata = cursor.fetchone()
+
+    cursor.execute("SELECT * FROM Skins")
+    quantidade = len(cursor.fetchall())
+    print(f"\n-----RELATÓRIO-----")
+    print(f"Total de skins cadastradas: {quantidade}")
+    print(f"Valor total das skins: R$ {total}")
+    print(f"Skin mais cara: {mais_cara[0]} (R$ {mais_cara[1]})")
+    print(f"Skin mais barata: {mais_barata[0]} (R$ {mais_barata[1]})")

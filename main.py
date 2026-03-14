@@ -54,7 +54,24 @@ def menu_skins():
             break
 
         elif opcao == '1':
-            skins.listar_skins()
+            print("\nComo deseja ordenar as skins?")
+            print("1 - Crescente (mais barata → mais cara)")
+            print("2 - Decrescente (mais cara → mais barata)")
+            print("3 - Ordem de inserção")
+
+            op = input("Escolha: ")
+
+            if op == '1':
+                skins.listar_skins("crescente")
+
+            elif op == '2':
+                skins.listar_skins("decrescente")
+
+            elif op == '3':
+                skins.listar_skins("insercao")
+
+            else:
+                print("Opção inválida.")
 
         elif opcao == '2':
             print("\n--- CADASTRAR NOVA SKIN ---")
