@@ -1,20 +1,20 @@
 from src.database import get_conexao
 
-def inserir_skin(nome, valor, estado, raridade, pattern, wear_rating):
+def inserir_skin(tipo ,nome, valor, estado, raridade, pattern, wear_rating):
     conn = get_conexao()
     if conn:
         try:
             cursor = conn.cursor()
             sql = """
-                INSERT INTO Skins (nome, valor, estado, raridade, pattern, wear_rating) 
-                VALUES (%s, %s, %s, %s, %s , %s)
+                INSERT INTO Skins (tipo ,nome, valor, estado, raridade, pattern, wear_rating) 
+                VALUES (%s ,%s, %s, %s, %s, %s , %s)
             """
-            valores = (nome, valor, estado, raridade, pattern, wear_rating)
+            valores = (tipo , nome, valor, estado, raridade, pattern, wear_rating)
             
             cursor.execute(sql, valores)
             conn.commit()
             
-            print(f"\nSucesso! A skin '{nome}' foi inserida no stock.")
+            print(f"\nSucesso! A skin '{nome}' foi inserida no banco.")
             
         except Exception as e:
             print(f"\nErro ao inserir a skin: {e}")
@@ -24,30 +24,61 @@ def inserir_skin(nome, valor, estado, raridade, pattern, wear_rating):
             cursor.close()
             conn.close()
 
-def atualizar_skin(id, nome, valor, estado, raridade, pattern, wear_rating):
+def atualizar_skin_completa(id, tipo, nome, valor, estado, raridade, pattern, wear_rating):
     conn = get_conexao()
     if conn:
         try:
             cursor = conn.cursor()
+
             sql = """
-                UPDATE Skins SET nome = %s, valor = %s, estado = %s, raridade = %s, pattern = %s, wear_rating = %s  
+                UPDATE Skins
+                SET tipo = %s, nome = %s, valor = %s, estado = %s,
+                    raridade = %s, pattern = %s, wear_rating = %s
                 WHERE id_skins = %s
             """
-            valores = (nome, valor, estado, raridade, pattern, wear_rating, id)
+
+            valores = (tipo, nome, valor, estado, raridade, pattern, wear_rating, id)
 
             cursor.execute(sql, valores)
 
             if cursor.rowcount > 0:
-                print(f"\n ID {id} atualizado!")
+                print(f"\nSkin ID {id} atualizada!")
+
             else:
-                print(f"\n Nenhuma skin encontrada com ID: {id}")
+                print(f"\nNenhuma skin encontrada com ID {id}")
 
             conn.commit()
-        
+
         except Exception as e:
-                print("\nErro ao atualizar os valores.")
-                conn.rollback()
-        
+            print("Erro ao atualizar skin.")
+            conn.rollback()
+
+        finally:
+            cursor.close()
+            conn.close()
+
+def atualizar_um_atributo(id, atributo, novo_valor):
+    conn = get_conexao()
+    if conn:
+        try:
+            cursor = conn.cursor()
+
+            sql = f"UPDATE Skins SET {atributo} = %s WHERE id_skins = %s"
+
+            cursor.execute(sql, (novo_valor, id))
+
+            if cursor.rowcount > 0:
+                print(f"\nAtributo {atributo} atualizado!")
+
+            else:
+                print("Skin não encontrada.")
+
+            conn.commit()
+
+        except Exception as e:
+            print("Erro ao atualizar atributo.")
+            conn.rollback()
+
         finally:
             cursor.close()
             conn.close()
@@ -59,13 +90,16 @@ def listar_skins(tipo_ordem):
             cursor = conn.cursor()
 
             if tipo_ordem == "crescente":
-                query = "SELECT id_skins, nome, valor, estado FROM Skins ORDER BY valor ASC"
+                query = "SELECT id_skins, tipo, nome, valor, estado FROM Skins ORDER BY valor ASC"
+
 
             elif tipo_ordem == "decrescente":
-                query = "SELECT id_skins, nome, valor, estado  FROM Skins ORDER BY valor DESC"
+                query = "SELECT id_skins, tipo, nome, valor, estado FROM Skins ORDER BY valor DESC"
 
             else:  
-                query = "SELECT id_skins, nome, valor, estado FROM Skins ORDER BY id_skins ASC"
+                query = "SELECT id_skins, tipo, nome, valor, estado FROM Skins ORDER BY id_skins ASC"
+
+                
 
             cursor.execute(query)
             skins = cursor.fetchall()
@@ -77,12 +111,14 @@ def listar_skins(tipo_ordem):
                 print("\n===== LISTA DE SKINS =====")
 
                 for skin in skins:
-                    print(f"ID: {skin[0]} | Nome: {skin[1]} | Preço: {skin[2]} | Estado: {skin[3]}")
+                    print(f"ID: {skin[0]} | Tipo: {skin[1]} | Nome: {skin[2]} | Preço: {skin[3]} | Estado: {skin[4]}")
 
                 gerar_relatorio(cursor)
+            return len(skins)
 
         except Exception as e:
             print(f"Erro ao listar skins: {e}")
+            return 0
 
         finally:
             cursor.close()
@@ -118,7 +154,7 @@ def pesquisar_skin_por_nome(nome_pesquisa):
         try:
             cursor = conn.cursor()
             
-            sql = "SELECT id_skins, nome, estado, valor FROM Skins WHERE nome ILIKE %s"
+            sql = "SELECT id_skins, tipo , nome, estado, valor FROM Skins WHERE nome ILIKE %s"
             cursor.execute(sql, (f"%{nome_pesquisa}%",))
             
             skins = cursor.fetchall()
@@ -126,7 +162,7 @@ def pesquisar_skin_por_nome(nome_pesquisa):
             if skins:
                 print(f"\nResultados para '{nome_pesquisa}':")
                 for s in skins:
-                    print(f"ID: {s[0]} | Nome: {s[1]} | Estado: {s[2]} | Valor: R$ {s[3]}")
+                    print(f"ID: {s[0]} | Tipo: {s[1]} | Nome: {s[2]} | Estado: {s[3]} | Valor: R$ {s[4]}")
             else:
                 print(f"\n Nenhuma skin encontrada com o nome '{nome_pesquisa}'.")
         except Exception as e:
@@ -147,12 +183,13 @@ def exibir_uma_skin(id_skin):
             if skin:
                 print("\n--- DETALHES DA SKIN ---")
                 print(f"ID: {skin[0]}")
-                print(f"Nome: {skin[1]}")
-                print(f"Valor: R$ {skin[2]}")
-                print(f"Estado: {skin[3]}")
-                print(f"Raridade: {skin[4]}")
-                print(f"Pattern: {skin[5]}")
-                print(f"Wear Rating: {skin[6]}")
+                print(f"TIPO: {skin[1]}")
+                print(f"Nome: {skin[2]}")
+                print(f"Valor: R$ {skin[3]}")
+                print(f"Estado: {skin[4]}")
+                print(f"Raridade: {skin[5]}")
+                print(f"Pattern: {skin[6]}")
+                print(f"Wear Rating: {skin[7]}")
             else:
                 print(f"\n Skin com ID {id_skin} não encontrada.")
         except Exception as e:
@@ -167,7 +204,7 @@ def gerar_relatorio(cursor):
     total = cursor.fetchone()[0]
 
     cursor.execute("""
-        SELECT nome, valor
+        SELECT tipo, nome, valor
         FROM Skins
         ORDER BY valor DESC
         LIMIT 1
@@ -175,7 +212,7 @@ def gerar_relatorio(cursor):
     mais_cara = cursor.fetchone()
 
     cursor.execute("""
-        SELECT nome, valor
+        SELECT tipo, nome, valor
         FROM Skins
         ORDER BY valor ASC
         LIMIT 1
@@ -187,5 +224,5 @@ def gerar_relatorio(cursor):
     print(f"\n-----RELATÓRIO-----")
     print(f"Total de skins cadastradas: {quantidade}")
     print(f"Valor total das skins: R$ {total}")
-    print(f"Skin mais cara: {mais_cara[0]} (R$ {mais_cara[1]})")
-    print(f"Skin mais barata: {mais_barata[0]} (R$ {mais_barata[1]})")
+    print(f"Skin mais cara: {mais_cara[0]} | {mais_cara[1]} (R$ {mais_cara[2]})")
+    print(f"Skin mais barata: {mais_barata[0]} | {mais_barata[1]} (R$ {mais_barata[2]})")
