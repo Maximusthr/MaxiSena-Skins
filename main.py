@@ -38,6 +38,11 @@ def menu_clientes():
 
 # ================= MENU SKINS =================
 def menu_skins():
+
+    tipo_skin = {1: "AK-47", 2: "AWP", 3: "DESERT EAGLE",
+                 4: "FACA", 5: "GLOCK", 6: "LUVA", 7: "M4A4",
+                 8: "M4A1-S", 9: "USP"}
+
     while True:
         print("\n=== MENU SKINS ===")
         print("1. Listar Skins")
@@ -76,6 +81,24 @@ def menu_skins():
         elif opcao == '2':
             print("\n--- CADASTRAR NOVA SKIN ---")
 
+            print(f"Digite o tipo da skin: \n")
+            for index, nome_skin in tipo_skin.items():
+                print(f"{index} - {nome_skin}")
+            
+            tipo = 0
+            while True:
+                try:
+                    tipo = int(input("\nDigite o número do tipo da skin: "))
+                    
+                    if tipo in tipo_skin:
+                        break 
+                    else:
+                        print("Opção inválida. Escolha um número que esteja na lista.")
+                        
+                except ValueError:
+                    print("Entrada inválida. Por favor, digite apenas números inteiros.")
+
+
             nome = input("Nome da Skin: ")
             valor = float(input("Valor (R$): "))
             estado = input("Estado: ")
@@ -83,33 +106,104 @@ def menu_skins():
             pattern = int(input("Pattern: "))
             wear = float(input("Wear Rating: "))
 
-            skins.inserir_skin(nome, valor, estado, raridade, pattern, wear)
+            skins.inserir_skin(tipo_skin[tipo], nome, valor, estado, raridade, pattern, wear)
 
         elif opcao == '3':
-            print("\n--- ATUALIZAR SKIN ---")
 
-            skins.listar_skins()
+            quantidade = skins.listar_skins("crescente")
 
-            try:
-                id_atualizar = int(input("Qual ID deseja atualizar? "))
+            if (quantidade == 0):
+                print("\nVoltando pro menu.")
+                continue
 
-                nome = input("Nome da Skin: ")
-                valor = float(input("Valor (R$): "))
+            print("\nComo deseja atualizar?")
+            print("1 - Atualizar todos os atributos")
+            print("2 - Atualizar apenas um atributo")
+
+            op = input("Escolha: ")
+
+            if op == '1':
+                id = int(input("ID da skin: "))
+
+                print(f"TIPOS: \n")
+                for index, nome_skin in tipo_skin.items():
+                    print(f"{index} - {nome_skin}")
+
+                tipo = 0
+                while True:
+                    try:
+                        tipo = int(input("\nDigite o número do tipo da skin: "))
+                        
+                        if tipo in tipo_skin:
+                            break 
+                        else:
+                            print("Opção inválida. Escolha um número que esteja na lista.")
+                            
+                    except ValueError:
+                        print("Entrada inválida. Por favor, digite apenas números inteiros.")
+
+                nome = input("Nome: ")
+                valor = float(input("Valor: "))
                 estado = input("Estado: ")
                 raridade = input("Raridade: ")
                 pattern = int(input("Pattern: "))
-                wear = float(input("Wear Rating: "))
-                
+                wear = float(input("Wear rating: "))
 
-                skins.atualizar_skin(id_atualizar, nome, valor, estado, raridade, pattern, wear)
+                skins.atualizar_skin_completa(id, tipo_skin[tipo], nome, valor, estado, raridade, pattern, wear)
+                 
+            elif op == '2':
+                id = int(input("ID da skin: "))
 
-            except ValueError:
-                print("Erro: ID inválido.")
+                print("\nQual atributo deseja alterar?")
+                print("1 Tipo")
+                print("2 Nome")
+                print("3 Valor")
+                print("4 Estado")
+                print("5 Raridade")
+                print("6 Pattern")
+                print("7 Wear rating")
 
+                escolha = input("Escolha: ")
+
+                atributos = {
+                    '1': ('tipo', str),
+                    '2': ('nome', str),
+                    '3': ('valor', float),
+                    '4': ('estado', str),
+                    '5': ('raridade', str),
+                    '6': ('pattern', int),
+                    '7': ('wear_rating', float)
+                }
+
+                selecao = atributos.get(escolha)
+
+                if selecao:
+                    nome_atributo = selecao[0]
+                    tipo_valor = selecao[1]
+
+                    valor = input(f"Novo valor para {nome_atributo}: ")
+
+                    try:
+                        novo_valor_convertido = tipo_valor(valor)
+                        
+                        skins.atualizar_um_atributo(id, nome_atributo, novo_valor_convertido)
+                        
+                    except ValueError:
+                        print(f"\nErro: O valor '{valor}' não é válido para {nome_atributo}.")
+                        print(f"Por favor, insira um dado do tipo {tipo_valor.__name__}.")
+                else:
+                    print("Opção inválida.")   
+                 
+                                
         elif opcao == '4':
+            
             print("\n--- DELETAR SKIN ---")
 
-            skins.listar_skins()
+            quantidade = skins.listar_skins("crescente")
+            
+            if (quantidade == 0):
+                print("\nVoltando pro menu")
+                continue
 
             try:
                 id_remover = int(input("ID da skin que deseja apagar: "))
@@ -129,6 +223,11 @@ def menu_skins():
 
         elif opcao == '6': 
             try:
+                quantidade = skins.listar_skins("crescente")
+                if (quantidade == 0):
+                    print("Voltando pro menu")
+                    continue
+
                 id_busca = int(input("\nDigite o ID exato da skin para ver detalhes: "))
                 skins.exibir_uma_skin(id_busca)
             except ValueError:

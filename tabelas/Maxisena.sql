@@ -1,5 +1,10 @@
+DROP TABLE IF EXISTS Compras;
+DROP TABLE IF EXISTS Clientes;
+DROP TABLE IF EXISTS Skins;
+
 CREATE TABLE Skins ( 
     id_skins                      SERIAL,
+    tipo                          VARCHAR(20) NOT NULL,
     nome                          VARCHAR(40) NOT NULL,
     valor                         FLOAT NOT NULL,
     estado                        VARCHAR(40) NOT NULL,
