@@ -4,3 +4,4 @@ __pycache__/
 app.py
 migrations/
 config.txt
+random.sql

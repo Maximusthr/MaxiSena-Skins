@@ -45,7 +45,7 @@ def menu_skins():
 
     while True:
         print("\n=== MENU SKINS ===")
-        print("1. Listar Skins")
+        print("1. Listar + Relatorio Skins")
         print("2. Cadastrar Skin")
         print("3. Atualizar Skin")
         print("4. Deletar Skin")
@@ -67,13 +67,13 @@ def menu_skins():
             op = input("Escolha: ")
 
             if op == '1':
-                skins.listar_skins("crescente")
+                skins.listar_skins("crescente", op)
 
             elif op == '2':
-                skins.listar_skins("decrescente")
+                skins.listar_skins("decrescente", op)
 
             elif op == '3':
-                skins.listar_skins("insercao")
+                skins.listar_skins("insercao", op)
 
             else:
                 print("Opção inválida.")
@@ -110,7 +110,7 @@ def menu_skins():
 
         elif opcao == '3':
 
-            quantidade = skins.listar_skins("crescente")
+            quantidade = skins.listar_skins("id", '6')
 
             if (quantidade == 0):
                 print("\nVoltando pro menu.")
@@ -199,7 +199,7 @@ def menu_skins():
             
             print("\n--- DELETAR SKIN ---")
 
-            quantidade = skins.listar_skins("crescente")
+            quantidade = skins.listar_skins("crescente", opcao)
             
             if (quantidade == 0):
                 print("\nVoltando pro menu")
@@ -223,7 +223,7 @@ def menu_skins():
 
         elif opcao == '6': 
             try:
-                quantidade = skins.listar_skins("crescente")
+                quantidade = skins.listar_skins("id", opcao)
                 if (quantidade == 0):
                     print("Voltando pro menu")
                     continue

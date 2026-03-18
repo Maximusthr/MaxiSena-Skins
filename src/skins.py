@@ -58,6 +58,16 @@ def atualizar_skin_completa(id, tipo, nome, valor, estado, raridade, pattern, we
             conn.close()
 
 def atualizar_um_atributo(id, atributo, novo_valor):
+
+    atributos_validos = [
+        "tipo", "nome", "valor", "estado",
+        "raridade", "pattern", "wear_rating"
+    ]
+
+    if atributo not in atributos_validos:
+        print("Atributo inválido.")
+        return
+
     conn = get_conexao()
     if conn:
         try:
@@ -83,7 +93,7 @@ def atualizar_um_atributo(id, atributo, novo_valor):
             cursor.close()
             conn.close()
 
-def listar_skins(tipo_ordem):
+def listar_skins(tipo_ordem, consulta):
     conn = get_conexao()
     if conn:
         try:
@@ -113,7 +123,7 @@ def listar_skins(tipo_ordem):
                 for skin in skins:
                     print(f"ID: {skin[0]} | Tipo: {skin[1]} | Nome: {skin[2]} | Preço: {skin[3]} | Estado: {skin[4]}")
 
-                gerar_relatorio(cursor)
+                if (consulta != '6'): gerar_relatorio(cursor)
             return len(skins)
 
         except Exception as e:
@@ -223,6 +233,6 @@ def gerar_relatorio(cursor):
     quantidade = len(cursor.fetchall())
     print(f"\n-----RELATÓRIO-----")
     print(f"Total de skins cadastradas: {quantidade}")
-    print(f"Valor total das skins: R$ {total}")
+    print(f"Valor total das skins: R$ {total:.2f}")
     print(f"Skin mais cara: {mais_cara[0]} | {mais_cara[1]} (R$ {mais_cara[2]})")
     print(f"Skin mais barata: {mais_barata[0]} | {mais_barata[1]} (R$ {mais_barata[2]})")
