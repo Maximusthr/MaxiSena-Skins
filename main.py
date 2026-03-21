@@ -199,7 +199,7 @@ def menu_skins():
             
             print("\n--- DELETAR SKIN ---")
 
-            quantidade = skins.listar_skins("crescente", opcao)
+            quantidade = skins.listar_skins("id", '6')
             
             if (quantidade == 0):
                 print("\nVoltando pro menu")

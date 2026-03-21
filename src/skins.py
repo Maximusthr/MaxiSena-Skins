@@ -121,7 +121,7 @@ def listar_skins(tipo_ordem, consulta):
                 print("\n===== LISTA DE SKINS =====")
 
                 for skin in skins:
-                    print(f"ID: {skin[0]} | Tipo: {skin[1]} | Nome: {skin[2]} | Preço: {skin[3]} | Estado: {skin[4]}")
+                    print(f"ID: {skin[0]} | Tipo: {skin[1]} | Nome: {skin[2]} | Preço: {skin[3]:.2f} | Estado: {skin[4]}")
 
                 if (consulta != '6'): gerar_relatorio(cursor)
             return len(skins)
@@ -172,7 +172,7 @@ def pesquisar_skin_por_nome(nome_pesquisa):
             if skins:
                 print(f"\nResultados para '{nome_pesquisa}':")
                 for s in skins:
-                    print(f"ID: {s[0]} | Tipo: {s[1]} | Nome: {s[2]} | Estado: {s[3]} | Valor: R$ {s[4]}")
+                    print(f"ID: {s[0]} | Tipo: {s[1]} | Nome: {s[2]} | Estado: {s[3]} | Valor: R$ {s[4]:.2f}")
             else:
                 print(f"\n Nenhuma skin encontrada com o nome '{nome_pesquisa}'.")
         except Exception as e:
@@ -195,7 +195,7 @@ def exibir_uma_skin(id_skin):
                 print(f"ID: {skin[0]}")
                 print(f"TIPO: {skin[1]}")
                 print(f"Nome: {skin[2]}")
-                print(f"Valor: R$ {skin[3]}")
+                print(f"Valor: R$ {skin[3]:.2f}")
                 print(f"Estado: {skin[4]}")
                 print(f"Raridade: {skin[5]}")
                 print(f"Pattern: {skin[6]}")
@@ -234,5 +234,5 @@ def gerar_relatorio(cursor):
     print(f"\n-----RELATÓRIO-----")
     print(f"Total de skins cadastradas: {quantidade}")
     print(f"Valor total das skins: R$ {total:.2f}")
-    print(f"Skin mais cara: {mais_cara[0]} | {mais_cara[1]} (R$ {mais_cara[2]})")
-    print(f"Skin mais barata: {mais_barata[0]} | {mais_barata[1]} (R$ {mais_barata[2]})")
+    print(f"Skin mais cara: R$ {mais_cara[0]:.2f} | R$ {mais_cara[1]:.2f} (R$ {mais_cara[2]:.2f})")
+    print(f"Skin mais barata: R$ {mais_barata[0]:.2f} | R$ {mais_barata[1]:.2f} (R$ {mais_barata[2]:.2f})")
