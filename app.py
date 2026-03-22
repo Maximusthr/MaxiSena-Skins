@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from src.database import db
 from src.models import Cliente, Vendedor, Pagamento, Skin, Compra, ItemCompra
 
+from src.clientes import clientes_bp
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -19,6 +21,9 @@ db.init_app(app)
 
 # Flask-Migrate (gerenciar futuras alterações nas tabelas)
 migrate = Migrate(app, db)
+
+# blueprint no flask
+app.register_blueprint(clientes_bp)
 
 # --- ROTAS DE TESTE ---
 

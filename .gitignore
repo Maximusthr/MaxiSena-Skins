@@ -2,7 +2,6 @@
 venv/
 __pycache__/
 migrations/
-clientes.py
 compras.py
 skins.py
 main.py
