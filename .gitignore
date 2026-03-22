@@ -1,7 +1,11 @@
 .env
 venv/
 __pycache__/
-app.py
 migrations/
+clientes.py
+compras.py
+skins.py
+main.py
+Maxisena.sql
 config.txt
 random.sql
