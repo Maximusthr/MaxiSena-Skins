@@ -54,3 +54,50 @@ def listar_clientes():
         })
         
     return jsonify(lista_retorno), 200
+
+@clientes_bp.route('/clientes/<int:id>', methods=['PUT'])
+def atualizar_cliente(id):
+    # O Flask pega o <id> da URL e o SQLAlchemy busca no banco
+    cliente = Cliente.query.get(id)
+    
+    if not cliente:
+        return jsonify({"erro": "Cliente não encontrado."}), 404
+        
+    dados = request.get_json()
+    
+    # Atualizamos apenas os campos que vieram no JSON
+    # A função .get(chave, valor_padrao) mantém o dado antigo se não enviarem um novo
+    cliente.nome = dados.get('nome', cliente.nome)
+    cliente.cpf = dados.get('cpf', cliente.cpf)
+    cliente.email = dados.get('email', cliente.email)
+    cliente.cidade = dados.get('cidade', cliente.cidade)
+    cliente.telefone = dados.get('telefone', cliente.telefone)
+    cliente.torce_flamengo = dados.get('torce_flamengo', cliente.torce_flamengo)
+    cliente.assiste_one_piece = dados.get('assiste_one_piece', cliente.assiste_one_piece)
+    
+    try:
+        db.session.commit()
+        return jsonify({"mensagem": f"Dados de {cliente.nome} atualizados com sucesso!"}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"erro": "Falha ao atualizar cliente.", "detalhes": str(e)}), 400
+
+@clientes_bp.route('/clientes/<int:id>', methods=['DELETE'])
+def deletar_cliente(id):
+    cliente = Cliente.query.get(id)
+    
+    if not cliente:
+        return jsonify({"erro": "Cliente não encontrado."}), 404
+        
+    try:
+        # Apaga o objeto e commita
+        db.session.delete(cliente)
+        db.session.commit()
+        return jsonify({"mensagem": f"Cliente {cliente.nome} (ID: {id}) deletado com sucesso!"}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        # se o cliente tiver uma compra registrada:
+        # o banco de dados NÃO deixa deletar ele (proteção de chave estrangeira).
+        return jsonify({"erro": "Não foi possível deletar o cliente. Verifique se ele possui compras atreladas.", "detalhes": str(e)}), 400
