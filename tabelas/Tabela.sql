@@ -18,7 +18,7 @@ CREATE TABLE Clientes (
 
 CREATE TABLE Vendedores (
     id_vendedor SERIAL PRIMARY KEY,
-    nome VARCHAR(40) NOT NULL,
+    nome VARCHAR(40) NOT NULL
     
 );
 

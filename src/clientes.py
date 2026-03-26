@@ -16,7 +16,7 @@ def cadastrar_cliente():
         email=dados.get('email'),
         cidade=dados.get('cidade'),
         telefone=dados.get('telefone'),
-        torce_flamengo=dados.get('torce_flamengo', False),    # Se não enviarem, assume False
+        torce_flamengo=dados.get('torce_flamengo', False),      # Se não enviarem, assume False
         assiste_one_piece=dados.get('assiste_one_piece', False) # Se não enviarem, assume False
     )
     
