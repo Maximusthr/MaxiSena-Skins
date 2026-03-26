@@ -8,6 +8,9 @@ from src.models import Cliente, Vendedor, Pagamento, Skin, Compra, ItemCompra
 
 from src.clientes import clientes_bp
 
+from src.clientes import clientes_bp
+from src.skins import skins_bp
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -24,6 +27,7 @@ migrate = Migrate(app, db)
 
 # blueprint no flask
 app.register_blueprint(clientes_bp)
+app.register_blueprint(skins_bp)
 
 # --- ROTAS DE TESTE ---
 

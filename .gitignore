@@ -3,7 +3,7 @@ venv/
 __pycache__/
 migrations/
 compras.py
-skins.py
+skins_copy.py
 main.py
 Maxisena.sql
 config.txt
