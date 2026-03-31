@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja de Skins CS2</title>
+    <style>
+        body { background-color: #1b2838; color: #c7d5e0; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
+        
+        /* Navbar */
+        .navbar { background-color: #171a21; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #66c0f4; }
+        .navbar h2 { margin: 0; color: #ffffff; cursor: pointer; }
+        .user-info { display: flex; gap: 15px; align-items: center; }
+        
+        .container { padding: 30px; max-width: 1200px; margin: 0 auto; }
+        .hidden { display: none !important; }
+
+        /* Formulários */
+        .form-box { background-color: #2a475e; padding: 25px; border-radius: 8px; max-width: 500px; margin: 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .form-box input, .form-box select { width: 100%; padding: 10px; margin: 10px 0; background-color: #1b2838; color: white; border: 1px solid #66c0f4; border-radius: 4px; box-sizing: border-box; }
+        
+        /* Grid da Loja */
+        .grid-skins { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .card { background-color: #2a475e; border-radius: 8px; padding: 20px; width: 250px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); text-align: center; border-top: 4px solid #66c0f4; }
+        .card h3 { margin-top: 0; color: #ffffff; }
+        .preco { font-size: 1.2em; font-weight: bold; color: #a3d9a5; }
+        
+        /* Tabelas */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #2a475e; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #1b2838; }
+        th { background-color: #171a21; color: white; }
+        .total-carrinho { font-size: 1.5em; font-weight: bold; color: #a3d9a5; text-align: right; margin-top: 20px; }
+
+        /* Botões */
+        button { background-color: #5c7e10; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; width: 100%; }
+        button:hover { background-color: #6a9013; }
+        .btn-secundario { background-color: #66c0f4; color: #171a21; }
+        .btn-secundario:hover { background-color: #4192c0; }
+        .btn-alerta { background-color: #d9534f; color: white; }
+        .btn-alerta:hover { background-color: #c9302c; }
+        .btn-pequeno { padding: 5px 10px; width: auto; font-size: 0.9em; }
+
+        /* Abas do Perfil */
+        .tab-menu { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #66c0f4; padding-bottom: 10px; }
+        .tab-btn { width: auto; background-color: transparent; border: 1px solid #66c0f4; color: #66c0f4; }
+        .tab-btn.ativo { background-color: #66c0f4; color: #171a21; }
+    </style>
+</head> 
+<body>
+
+    <div class="navbar">
+        <h2 onclick="mostrarLoja()">🛒 Mercado de Skins</h2>
+        <div class="user-info">
+            <span id="nome-usuario-logado">Visitante</span>
+            <button class="btn-secundario" style="width: auto;" onclick="mostrarPerfil()">👤 Meu Perfil</button>
+            <button class="btn-secundario" style="width: auto;" onclick="mostrarCadastro()">Cadastrar Cliente</button>
+            <button class="btn-alerta" style="width: auto;" onclick="mostrarPainelVendedor()">Área do Vendedor</button>
+            <button id="btn-carrinho" style="width: auto; background-color: #e6a822; color: black;" onclick="mostrarCarrinho()">🛒 Carrinho (0)</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="tela-cadastro">
+        <div class="form-box">
+            <h3 style="text-align: center; color: white;">Novo Cadastro de Cliente</h3>
+            <input type="text" id="cad-nome" placeholder="Nome Completo">
+            <input type="text" id="cad-cpf" placeholder="CPF">
+            <input type="email" id="cad-email" placeholder="E-mail">
+            <input type="text" id="cad-cidade" placeholder="Cidade">
+            <input type="text" id="cad-telefone" placeholder="Telefone">
+            <div style="margin: 15px 0;">
+                <input type="checkbox" id="cad-flamengo"> <label for="cad-flamengo">Torce para o Flamengo? 🔴⚫</label><br>
+                <input type="checkbox" id="cad-onepiece"> <label for="cad-onepiece">Assiste One Piece? 🏴‍☠️</label>
+            </div>
+            <button onclick="registrarCliente()">Criar Conta e Entrar</button>
+            <button class="btn-secundario" style="margin-top: 10px;" onclick="mostrarLoja()">Voltar</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="tela-vendedor">
+        <div class="form-box" style="border-top-color: #d9534f;">
+            <h3 style="text-align: center; color: white;">🛠️ Cadastrar Skin no Estoque</h3>
+            <input type="text" id="skin-nome" placeholder="Nome (ex: Asiimov)">
+            <input type="text" id="skin-tipo" placeholder="Arma (ex: AWP)">
+            <input type="text" id="skin-categoria" placeholder="Categoria">
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="skin-valor" placeholder="Valor (R$)" step="0.01">
+                <input type="number" id="skin-estoque" placeholder="Qtd Estoque" step="1">
+            </div>
+            <select id="skin-estado"><option value="Factory New">Factory New</option><option value="Field-Tested">Field-Tested</option></select>
+            <select id="skin-raridade"><option value="Mil-Spec">Mil-Spec</option><option value="Covert">Covert</option></select>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="skin-pattern" placeholder="Pattern" step="1">
+                <input type="number" id="skin-wear" placeholder="Wear Rating" step="0.01">
+            </div>
+            <div style="margin: 15px 0;">
+                <input type="checkbox" id="skin-mari"> <label for="skin-mari">Fabricado em Mari? 🇧🇷</label>
+            </div>
+            <button class="btn-alerta" onclick="registrarSkin()">Salvar no Banco</button>
+            <button class="btn-secundario" style="margin-top: 10px;" onclick="mostrarLoja()">Voltar</button>
+        </div>
+    </div>
+
+    <div class="container" id="tela-loja">
+        <h2 style="text-align: center;">Destaques do Estoque</h2>
+        <div class="grid-skins" id="loja"></div>
+    </div>
+
+    <div class="container hidden" id="tela-carrinho">
+        <h2>Seu Carrinho de Compras</h2>
+        <div id="conteudo-carrinho"></div>
+
+        <div class="form-box" style="margin-top: 30px; border-top-color: #e6a822; max-width: 600px;">
+            <h3 style="margin-top: 0; color: white;">💳 Finalizar Pagamento</h3>
+            
+            <label>Quem te atendeu hoje?</label>
+            <select id="vendedor-caixa">
+                <option value="1">Gabe Newell</option>
+                <option value="2">Gaules</option>
+                <option value="3">Apoka</option>
+            </select>
+
+            <label>Selecione a Forma de Pagamento:</label>
+            <select id="forma-pagamento">
+                <option value="Pix">Pix (Aprovação Imediata)</option>
+                <option value="Cartao">Cartão de Crédito</option>
+                <option value="Boleto">Boleto Bancário</option>
+                <option value="Berries">Berries 🏴‍☠️</option>
+            </select>
+            
+            <hr style="border-color: #1b2838; margin: 15px 0;">
+            <label style="color: #d9534f; font-weight: bold;">⚠️ Confirmação de Identidade:</label>
+            <input type="text" id="confirmar-cpf" placeholder="Digite seu CPF para validar a compra">
+
+            <button onclick="finalizarCompra()" style="font-size: 1.2em; padding: 15px; margin-top: 10px;">Confirmar Pedido</button>
+            <button class="btn-secundario" style="margin-top: 10px;" onclick="mostrarLoja()">Continuar Comprando</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="tela-perfil">
+        <div class="form-box" style="max-width: 800px; border-top-color: #66c0f4;">
+            
+            <div class="tab-menu">
+                <button id="btn-tab-dados" class="tab-btn ativo" onclick="alternarAba('dados')">Meus Dados Cadastrais</button>
+                <button id="btn-tab-pedidos" class="tab-btn" onclick="alternarAba('pedidos')">Meus Pedidos Realizados</button>
+            </div>
+            
+            <div id="aba-dados">
+                <h3 style="color: white; margin-top: 0;">👤 Informações da Conta</h3>
+                <div id="dados-cadastrais" style="font-size: 1.1em;">
+                    </div>
+            </div>
+
+            <div id="aba-pedidos" class="hidden">
+                <h3 style="color: #a3d9a5; margin-top: 0;">📦 Histórico de Compras</h3>
+                <div id="historico-pedidos">
+                    </div>
+            </div>
+            
+            <button class="btn-secundario" style="margin-top: 20px;" onclick="mostrarLoja()">Voltar para a Loja</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. GESTÃO DE ESTADO (CARRINHO)
+        // ==========================================
+        let carrinho = []; 
+
+        function adicionarAoCarrinho(id, nome, preco) {
+            let itemExistente = carrinho.find(item => item.id_skin === id);
+            if (itemExistente) { itemExistente.quantidade += 1; } 
+            else { carrinho.push({ id_skin: id, nome: nome, quantidade: 1, preco: preco }); }
+            atualizarContadorCarrinho();
+            alert(`✅ ${nome} adicionada ao carrinho!`);
+        }
+
+        function removerDoCarrinho(id) {
+            carrinho = carrinho.filter(item => item.id_skin !== id);
+            atualizarContadorCarrinho(); renderizarCarrinho(); 
+        }
+
+        function atualizarContadorCarrinho() {
+            let totalItens = carrinho.reduce((sum, item) => sum + item.quantidade, 0);
+            document.getElementById('btn-carrinho').innerText = `🛒 Carrinho (${totalItens})`;
+        }
+
+        // ==========================================
+        // 2. CHECKOUT E COMPRA COM VALIDAÇÃO DE CPF
+        // ==========================================
+        function mostrarCarrinho() {
+            esconderTodas();
+            document.getElementById('tela-carrinho').classList.remove('hidden');
+            renderizarCarrinho();
+        }
+
+        function renderizarCarrinho() {
+            const divConteudo = document.getElementById('conteudo-carrinho');
+            if (carrinho.length === 0) {
+                divConteudo.innerHTML = `<p style="text-align: center; font-size: 1.2em; color: #8f98a0;">Seu carrinho está vazio.</p>`; return;
+            }
+
+            let htmlTabela = `<table><tr><th>Item</th><th>Preço Unit.</th><th>Qtd</th><th>Subtotal</th><th>Ação</th></tr>`;
+            let subtotalGeral = 0;
+
+            carrinho.forEach(item => {
+                let subtotalItem = item.quantidade * item.preco;
+                subtotalGeral += subtotalItem;
+                htmlTabela += `
+                    <tr><td><strong>${item.nome}</strong></td><td>R$ ${item.preco.toFixed(2)}</td><td>${item.quantidade}</td><td>R$ ${subtotalItem.toFixed(2)}</td><td><button class="btn-alerta btn-pequeno" onclick="removerDoCarrinho(${item.id_skin})">X</button></td></tr>`;
+            });
+
+            htmlTabela += `</table><div class="total-carrinho">Subtotal (Sem descontos): R$ ${subtotalGeral.toFixed(2)}</div>`;
+            divConteudo.innerHTML = htmlTabela;
+        }
+
+        function finalizarCompra() {
+            if (carrinho.length === 0) { alert("❌ Seu carrinho está vazio!"); return; }
+
+            const clienteId = localStorage.getItem("cliente_logado_id");
+            if (!clienteId) { alert("⚠️ Você precisa logar ou cadastrar antes de comprar!"); mostrarCadastro(); return; }
+
+            // NOVIDADE: Validação do CPF do cliente logado!
+            const cpfDigitado = document.getElementById('confirmar-cpf').value.trim();
+            const cpfSalvo = localStorage.getItem("cliente_logado_cpf");
+
+            if (!cpfDigitado) {
+                alert("⚠️ Por favor, informe seu CPF para validar a compra."); return;
+            }
+            if (cpfDigitado !== cpfSalvo) {
+                alert("❌ O CPF informado não bate com o do cliente logado. Compra barrada!"); return;
+            }
+
+            const idVendedorEscolhido = document.getElementById('vendedor-caixa').value;
+            const formaPagamento = document.getElementById('forma-pagamento').value;
+            const status = formaPagamento === 'Boleto' ? 'Pendente' : 'Confirmado';
+
+            const payload = {
+                id_cliente: parseInt(clienteId),
+                id_vendedor: parseInt(idVendedorEscolhido),
+                pagamento: { forma_pagamento: formaPagamento, status_confirmacao: status },
+                itens: carrinho.map(item => ({ id_skin: item.id_skin, quantidade: item.quantidade }))
+            };
+
+            fetch('/compras', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(resposta => resposta.json())
+            .then(dados => {
+                if (dados.erro) { alert("❌ ERRO NA COMPRA: " + dados.detalhes); } 
+                else {
+                    let subtotalDaTela = carrinho.reduce((sum, item) => sum + (item.quantidade * item.preco), 0);
+                    alert(`🎉 SUCESSO! Compra Finalizada.\n\nSubtotal: R$ ${subtotalDaTela.toFixed(2)}\n\nVALOR FINAL PAGO: R$ ${dados.resumo.valor_final_pago}`);                    
+                    carrinho = []; atualizarContadorCarrinho(); document.getElementById('confirmar-cpf').value = ''; mostrarLoja(); 
+                }
+            });
+        }
+
+        // ==========================================
+        // 3. PERFIL DO USUÁRIO E ABAS
+        // ==========================================
+        function alternarAba(aba) {
+            document.getElementById('btn-tab-dados').classList.remove('ativo');
+            document.getElementById('btn-tab-pedidos').classList.remove('ativo');
+            document.getElementById('aba-dados').classList.add('hidden');
+            document.getElementById('aba-pedidos').classList.add('hidden');
+
+            document.getElementById(`btn-tab-${aba}`).classList.add('ativo');
+            document.getElementById(`aba-${aba}`).classList.remove('hidden');
+        }
+
+        function mostrarPerfil() {
+            const clienteId = localStorage.getItem("cliente_logado_id");
+            if (!clienteId) { alert("Você precisa estar logado para ver seu perfil!"); return; }
+
+            esconderTodas();
+            document.getElementById('tela-perfil').classList.remove('hidden');
+            alternarAba('dados'); // Abre sempre na aba de dados por padrão
+
+            fetch(`/clientes/${clienteId}/historico`)
+            .then(res => res.json())
+            .then(dados => {
+                // Preenche a Aba 1 (Dados)
+                document.getElementById('dados-cadastrais').innerHTML = `
+                    <p><strong>Nome Completo:</strong> ${dados.nome}</p>
+                    <p><strong>CPF:</strong> ${dados.cpf}</p>
+                    <p><strong>E-mail:</strong> ${dados.email}</p>
+                    <p><strong>Cidade:</strong> ${dados.cidade}</p>
+                    <p><strong>Telefone:</strong> ${dados.telefone}</p>
+                    <p><strong>Descontos Ativos:</strong> 
+                        ${dados.descontos_elegiveis.flamengo ? '🔴⚫ Flamengo ' : ''}
+                        ${dados.descontos_elegiveis.one_piece ? '🏴‍☠️ One Piece ' : ''}
+                        ${dados.descontos_elegiveis.sousa ? '🦖 Sousa' : ''}
+                    </p>`;
+
+                // Preenche a Aba 2 (Pedidos)
+                let htmlHistorico = '';
+                if (dados.historico_compras.length === 0) {
+                    htmlHistorico = "<p>Você ainda não fez nenhuma compra.</p>";
+                } else {
+                    dados.historico_compras.forEach(compra => {
+                        htmlHistorico += `
+                        <div style="background-color: #1b2838; padding: 15px; margin-top: 10px; border-radius: 5px; border-left: 4px solid #a3d9a5;">
+                            <strong>Pedido #${compra.id_compra}</strong> - Feito em: ${compra.data} <br>
+                            Vendedor (Caixa): ${compra.vendedor_responsavel} | Status: ${compra.pagamento.status} <br>
+                            <span class="preco">Total Pago: R$ ${compra.valor_total_pago.toFixed(2)}</span>
+                            <ul style="margin: 5px 0; color: #8f98a0;">`;
+                            
+                        compra.itens_comprados.forEach(item => {
+                            htmlHistorico += `<li>${item.quantidade}x ${item.nome_skin} (R$ ${item.preco_unitario_na_epoca})</li>`;
+                        });
+                        htmlHistorico += `</ul></div>`;
+                    });
+                }
+                document.getElementById('historico-pedidos').innerHTML = htmlHistorico;
+            });
+        }
+
+        // ==========================================
+        // 4. NAVEGAÇÃO E REQUISIÇÕES BÁSICAS
+        // ==========================================
+        function esconderTodas() { document.querySelectorAll('.container').forEach(c => c.classList.add('hidden')); }
+        function mostrarCadastro() { esconderTodas(); document.getElementById('tela-cadastro').classList.remove('hidden'); }
+        function mostrarPainelVendedor() { esconderTodas(); document.getElementById('tela-vendedor').classList.remove('hidden'); }
+        function mostrarLoja() { esconderTodas(); document.getElementById('tela-loja').classList.remove('hidden'); carregarSkins(); }
+
+        function carregarSkins() {
+            fetch('/skins').then(r => r.json()).then(skins => {
+                const lojaDiv = document.getElementById('loja'); lojaDiv.innerHTML = '';
+                skins.forEach(skin => {
+                    lojaDiv.innerHTML += `
+                        <div class="card">
+                            <h3>${skin.nome}</h3><p>${skin.tipo} - ${skin.categoria}</p><p class="preco">R$ ${skin.valor.toFixed(2)}</p><p class="estoque">Estoque: ${skin.estoque} un.</p>
+                            <button onclick="adicionarAoCarrinho(${skin.id}, '${skin.nome}', ${skin.valor})">🛒 Adicionar</button>
+                        </div>`;
+                });
+            });
+        }
+
+        function registrarCliente() {
+            const cpfCadastrado = document.getElementById('cad-cpf').value;
+            const payload = { nome: document.getElementById('cad-nome').value, cpf: cpfCadastrado, email: document.getElementById('cad-email').value, cidade: document.getElementById('cad-cidade').value, telefone: document.getElementById('cad-telefone').value, torce_flamengo: document.getElementById('cad-flamengo').checked, assiste_one_piece: document.getElementById('cad-onepiece').checked };
+            
+            fetch('/clientes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(r => r.json()).then(d => { 
+                if(d.erro) alert("❌ " + d.detalhes); 
+                else { 
+                    localStorage.setItem("cliente_logado_id", d.id_cliente); 
+                    localStorage.setItem("cliente_logado_nome", payload.nome); 
+                    localStorage.setItem("cliente_logado_cpf", cpfCadastrado); // Guarda o CPF para validar na compra!
+                    
+                    alert("✅ Cadastrado com sucesso!"); atualizarHeader(); mostrarLoja(); 
+                } 
+            });
+        }
+
+        function registrarSkin() {
+            const payload = { nome: document.getElementById('skin-nome').value, tipo: document.getElementById('skin-tipo').value, categoria: document.getElementById('skin-categoria').value, valor: parseFloat(document.getElementById('skin-valor').value), estoque: parseInt(document.getElementById('skin-estoque').value), estado: document.getElementById('skin-estado').value, raridade: document.getElementById('skin-raridade').value, pattern: parseInt(document.getElementById('skin-pattern').value), wear_rating: parseFloat(document.getElementById('skin-wear').value), fabricado_em_mari: document.getElementById('skin-mari').checked };
+            fetch('/skins', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(r => r.json()).then(d => { if(d.erro) alert("❌ " + d.detalhes); else { alert("✅ " + d.mensagem); mostrarLoja(); } });
+        }
+
+        function atualizarHeader() {
+            const nomeLogado = localStorage.getItem("cliente_logado_nome");
+            if (nomeLogado) document.getElementById('nome-usuario-logado').innerText = "Cliente: " + nomeLogado;
+        }
+
+        atualizarHeader(); carregarSkins();
+    </script>
+</body>
+</html>
