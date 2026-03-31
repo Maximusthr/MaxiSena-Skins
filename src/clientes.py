@@ -9,7 +9,7 @@ clientes_bp = Blueprint('clientes', __name__)
 def cadastrar_cliente():
     dados = request.get_json()
     
-    # Objeto da nossa Classe (SQLAlchemy)
+    # Objeto da Classe (SQLAlchemy)
     novo_cliente = Cliente(
         nome=dados.get('nome'),
         cpf=dados.get('cpf'),
@@ -35,6 +35,7 @@ def cadastrar_cliente():
         # Cpf em uso
         return jsonify({"erro": "Falha ao cadastrar. Verifique se o CPF já está em uso.", "detalhes": str(e)}), 400
 
+# READ
 @clientes_bp.route('/clientes', methods=['GET'])
 def listar_clientes():
     # "SELECT * FROM Clientes"
@@ -101,3 +102,58 @@ def deletar_cliente(id):
         # se o cliente tiver uma compra registrada:
         # o banco de dados NÃO deixa deletar ele (proteção de chave estrangeira).
         return jsonify({"erro": "Não foi possível deletar o cliente. Verifique se ele possui compras atreladas.", "detalhes": str(e)}), 400
+    
+# Histórico e Dados do Cliente
+@clientes_bp.route('/clientes/<int:id>/historico', methods=['GET'])
+def historico_cliente(id):
+    # Vai buscar o cliente ao banco de dados
+    cliente = Cliente.query.get(id)
+    
+    if not cliente:
+        return jsonify({"erro": "Cliente não encontrado."}), 404
+
+    # dados
+    dados_cliente = {
+        "id_cliente": cliente.id_cliente,
+        "nome": cliente.nome,
+        "cpf": cliente.cpf,
+        "email": cliente.email,
+        "cidade": cliente.cidade,
+        "telefone": cliente.telefone,
+        "descontos_elegiveis": {
+            "flamengo": cliente.torce_flamengo,
+            "one_piece": cliente.assiste_one_piece,
+            "sousa": cliente.cidade.strip().lower() == 'sousa'
+        },
+        "historico_compras": [] # Lista que vai guardar os pedidos
+    }
+
+    # compras dos clientes
+    for compra in cliente.compras:
+        compra_dict = {
+            "id_compra": compra.id_compra,
+            # Formata a data para um padrão mais legível
+            "data": compra.data_compra.strftime("%d/%m/%Y %H:%M"),
+            "vendedor_responsavel": compra.vendedor.nome, # backref do Vendedor
+            "valor_total_pago": compra.valor_total,
+            "pagamento": {
+                "forma": compra.pagamento.forma_pagamento, # uselist=False do Pagamento
+                "status": compra.pagamento.status_confirmacao
+            },
+            "itens_comprados": []
+        }
+
+        # itens dentro daquela compra específica
+        for item in compra.itens:
+            item_dict = {
+                "nome_skin": item.skin.nome, 
+                "quantidade": item.quantidade,
+                "preco_unitario_na_epoca": item.preco_unitario,
+                "subtotal_item": item.quantidade * item.preco_unitario
+            }
+            compra_dict["itens_comprados"].append(item_dict)
+
+        # Adiciona a compra ao histórico do cliente
+        dados_cliente["historico_compras"].append(compra_dict)
+
+    return jsonify(dados_cliente), 200
