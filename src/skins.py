@@ -2,9 +2,10 @@ from flask import Blueprint, request, jsonify
 from src.database import db
 from src.models import Skin
 
-# Blueprint para as rotas do estoque de skins
+# Cria o Blueprint para as rotas do stock de skins
 skins_bp = Blueprint('skins', __name__)
 
+# CREATE skins
 @skins_bp.route('/skins', methods=['POST'])
 def cadastrar_skin():
     dados = request.get_json()
@@ -18,7 +19,7 @@ def cadastrar_skin():
         raridade=dados.get('raridade'),
         pattern=dados.get('pattern'),
         wear_rating=dados.get('wear_rating'),
-        estoque=dados.get('estoque', 0), # zero se nao definir
+        estoque=dados.get('estoque', 0), # Começa com zero se não for definido
         fabricado_em_mari=dados.get('fabricado_em_mari', False)
     )
     
@@ -26,7 +27,7 @@ def cadastrar_skin():
         db.session.add(nova_skin)
         db.session.commit()
         return jsonify({
-            "mensagem": f"Skin {nova_skin.nome} cadastrada no estoque!", 
+            "mensagem": f"Skin '{nova_skin.nome}' cadastrada no stock com sucesso!", 
             "id_skins": nova_skin.id_skins
         }), 201
         
@@ -34,6 +35,7 @@ def cadastrar_skin():
         db.session.rollback()
         return jsonify({"erro": "Falha ao cadastrar a skin.", "detalhes": str(e)}), 400
 
+# READ skins
 @skins_bp.route('/skins', methods=['GET'])
 def listar_skins():
     # Recupera o parâmetro 'ordem' da URL (Ex: /skins?ordem=crescente)
@@ -42,7 +44,7 @@ def listar_skins():
     # Inicia a consulta base
     query = Skin.query
     
-    # Aplica a ordenação no banco de dados se o usuário pedir
+    # Aplica a ordenação no banco de dados consoante o pedido do utilizador
     if ordem == 'crescente':
         query = query.order_by(Skin.valor.asc())
     elif ordem == 'decrescente':
@@ -68,6 +70,7 @@ def listar_skins():
         
     return jsonify(lista_retorno), 200
 
+# UPDATE skins
 @skins_bp.route('/skins/<int:id>', methods=['PUT'])
 def atualizar_skin(id):
     skin = Skin.query.get(id)
@@ -77,6 +80,7 @@ def atualizar_skin(id):
         
     dados = request.get_json()
     
+    # Atualiza apenas os campos que foram enviados no JSON
     skin.tipo = dados.get('tipo', skin.tipo)
     skin.nome = dados.get('nome', skin.nome)
     skin.categoria = dados.get('categoria', skin.categoria)
@@ -90,12 +94,13 @@ def atualizar_skin(id):
     
     try:
         db.session.commit()
-        return jsonify({"mensagem": f"Skin {skin.nome} atualizada com sucesso!"}), 200
+        return jsonify({"mensagem": f"Skin '{skin.nome}' atualizada com sucesso!"}), 200
         
     except Exception as e:
         db.session.rollback()
         return jsonify({"erro": "Falha ao atualizar a skin.", "detalhes": str(e)}), 400
 
+# DELETE skins
 @skins_bp.route('/skins/<int:id>', methods=['DELETE'])
 def deletar_skin(id):
     skin = Skin.query.get(id)
@@ -106,8 +111,76 @@ def deletar_skin(id):
     try:
         db.session.delete(skin)
         db.session.commit()
-        return jsonify({"mensagem": f"Skin {skin.nome} removida do estoque!"}), 200
+        return jsonify({"mensagem": f"Skin '{skin.nome}' removida do stock!"}), 200
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({"erro": "Não é possível deletar esta skin pois ela já faz parte de uma compra registrada.", "detalhes": str(e)}), 400
+        return jsonify({
+            "erro": "Não é possível eliminar esta skin pois ela já faz parte de uma compra registada (Integridade Referencial).", 
+            "detalhes": str(e)
+        }), 400
+
+# Filtrar skins
+@skins_bp.route('/skins/filtrar', methods=['GET'])
+def filtrar_skins():
+    # filtro por: nome, faixa de preço, categoria e se foram fabricados em Mari
+    nome_pesquisa = request.args.get('nome')
+    categoria = request.args.get('categoria')
+    preco_min = request.args.get('preco_min', type=float)
+    preco_max = request.args.get('preco_max', type=float)
+    
+    # Como booleanos em URL vêm como string ('true', 'false'), fazemos esta conversão
+    fabricado_mari_str = request.args.get('mari')
+    fabricado_mari = None
+    if fabricado_mari_str is not None:
+        fabricado_mari = fabricado_mari_str.lower() == 'true'
+
+    query = Skin.query
+
+    # Aplica os filtros de forma dinâmica (apenas se o utilizador os enviou na URL)
+    if nome_pesquisa:
+        query = query.filter(Skin.nome.ilike(f"%{nome_pesquisa}%"))
+    if categoria:
+        query = query.filter(Skin.categoria.ilike(f"%{categoria}%"))
+    if preco_min is not None:
+        query = query.filter(Skin.valor >= preco_min)
+    if preco_max is not None:
+        query = query.filter(Skin.valor <= preco_max)
+    if fabricado_mari is not None:
+        query = query.filter(Skin.fabricado_em_mari == fabricado_mari)
+
+    skins = query.all()
+    
+    lista_retorno = []
+    for s in skins:
+        lista_retorno.append({
+            "id": s.id_skins,
+            "nome": s.nome,
+            "categoria": s.categoria,
+            "valor": s.valor,
+            "estoque": s.estoque,
+            "fabricado_em_mari": s.fabricado_em_mari
+        })
+        
+    return jsonify(lista_retorno), 200
+
+# Estoque baixo
+@skins_bp.route('/skins/estoque-baixo', methods=['GET'])
+def verificar_estoque_baixo():
+    # "Caso seja um funcionário usando o sistema, ele deve poder filtrar pelos 
+    # produtos que possuem menos que 5 unidades disponíveis."
+    skins_em_alerta = Skin.query.filter(Skin.estoque < 5).all()
+    
+    lista_retorno = []
+    for s in skins_em_alerta:
+        lista_retorno.append({
+            "id": s.id_skins,
+            "nome": s.nome,
+            "estoque": s.estoque,
+            "alerta": "STOCK CRÍTICO"
+        })
+        
+    return jsonify({
+        "total_itens_em_alerta": len(lista_retorno), 
+        "produtos": lista_retorno
+    }), 200
