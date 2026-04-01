@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from src.database import db
 from src.models import Vendedor
+from sqlalchemy import text  
 
 # Cria o Blueprint para as rotas de vendedores
 vendedores_bp = Blueprint('vendedores', __name__)
@@ -9,12 +10,17 @@ vendedores_bp = Blueprint('vendedores', __name__)
 def cadastrar_vendedor():
     dados = request.get_json()
     
-    # garantir que o nome foi enviado
-    if 'nome' not in dados or not dados['nome'].strip():
-        return jsonify({"erro": "O nome do vendedor é obrigatorio."}), 400
+    nome = dados.get('nome')
+    email = dados.get('email')
+    senha = dados.get('senha')
+    
+    if not all([nome, email, senha]):
+        return jsonify({"erro": "O nome, email e senha do vendedor são obrigatórios."}), 400
 
     novo_vendedor = Vendedor(
-        nome=dados.get('nome')
+        nome=nome,
+        email=email,
+        senha=senha
     )
     
     try:
@@ -27,7 +33,7 @@ def cadastrar_vendedor():
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({"erro": "Falha ao cadastrar o vendedor.", "detalhes": str(e)}), 400
+        return jsonify({"erro": "Falha ao cadastrar o vendedor. Verifique se o e-mail já existe.", "detalhes": str(e)}), 400
 
 @vendedores_bp.route('/vendedores', methods=['GET'])
 def listar_vendedores():
@@ -37,7 +43,8 @@ def listar_vendedores():
     for v in vendedores:
         lista_retorno.append({
             "id": v.id_vendedor,
-            "nome": v.nome
+            "nome": v.nome,
+            "email": v.email
         })
         
     return jsonify(lista_retorno), 200
@@ -53,6 +60,8 @@ def atualizar_vendedor(id):
     
     # Atualiza o nome se ele for enviado no JSON
     vendedor.nome = dados.get('nome', vendedor.nome)
+    vendedor.email = dados.get('email', vendedor.email) 
+    vendedor.senha = dados.get('senha', vendedor.senha) 
     
     try:
         db.session.commit()
@@ -131,3 +140,55 @@ def relatorio_vendedor(id):
         },
         "detalhes_das_vendas": compras_filtradas
     }), 200
+
+@vendedores_bp.route('/relatorio-geral', methods=['GET'])
+def relatorio_geral_view():
+    try:
+        query = text("SELECT * FROM vw_relatorio_vendas")
+        resultado = db.session.execute(query).mappings().all()
+        
+        # Monta a lista para o Front-end
+        lista_relatorio = []
+        for linha in resultado:
+            lista_relatorio.append({
+                "id_compra": linha['id_compra'],
+                "data_venda": linha['data_venda'],
+                "nome_cliente": linha['nome_cliente'],
+                "nome_vendedor": linha['nome_vendedor'],
+                "forma_pagamento": linha['forma_pagamento'],
+                "status_confirmacao": linha['status_confirmacao'],
+                "valor_pago": float(linha['valor_pago']) 
+            })
+            
+        return jsonify(lista_relatorio), 200
+        
+    except Exception as e:
+        return jsonify({"erro": "Falha ao consultar a View no banco de dados.", "detalhes": str(e)}), 500
+    
+
+@vendedores_bp.route('/estoque-critico', methods=['GET'])
+def estoque_critico_view():
+    try:
+        # Chama a View criada diretamente no PostgreSQL
+        query = text("SELECT * FROM vw_estoque_critico")
+        resultado = db.session.execute(query).mappings().all()
+        
+        # Monta a lista formatada para o Front-end
+        lista_estoque = []
+        for linha in resultado:
+            lista_estoque.append({
+                "id_skins": linha['id_skins'], # Se a sua coluna de ID no banco chamar apenas 'id', troque aqui para linha['id']
+                "nome": linha['nome'],
+                "tipo": linha['tipo'],
+                "categoria": linha['categoria'],
+                "estoque": linha['estoque'],
+                "valor": float(linha['valor']) # Garante que o valor decimal do banco vá como float para o JSON
+            })
+            
+        return jsonify(lista_estoque), 200
+        
+    except Exception as e:
+        return jsonify({
+            "erro": "Falha ao consultar a View de estoque crítico no banco de dados.", 
+            "detalhes": str(e)
+        }), 500
