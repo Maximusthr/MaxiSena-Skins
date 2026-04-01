@@ -38,7 +38,7 @@ CREATE TABLE Skins (
     raridade VARCHAR(40) NOT NULL,
     pattern INTEGER NOT NULL,
     wear_rating FLOAT NOT NULL,
-    estoque INTEGER NOT NULL CHECK (estoque >= 0), -- Não pode ficar negativo
+    estoque INTEGER NOT NULL CHECK (estoque >= 0),
     fabricado_em_mari BOOLEAN DEFAULT FALSE
 );
 

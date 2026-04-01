@@ -27,4 +27,4 @@ FROM skins
 WHERE estoque < 5
 ORDER BY estoque ASC;
 
--- Como usar: SELECT * FROM vw_estoque_critico;
+-- SELECT * FROM vw_estoque_critico;
