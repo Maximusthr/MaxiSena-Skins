@@ -192,3 +192,16 @@ def estoque_critico_view():
             "erro": "Falha ao consultar a View de estoque crítico no banco de dados.", 
             "detalhes": str(e)
         }), 500
+    
+@vendedores_bp.route('/reajuste-mercado', methods=['POST'])
+def reajuste_mercado():
+    try:
+        query = text("CALL sp_reajuste_mercado()")
+        db.session.execute(query)
+        db.session.commit()
+        
+        return jsonify({"mensagem": "Reajuste de mercado concluído! Preços atualizados conforme oferta e demanda."}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"erro": "Falha ao rodar o algoritmo de reajuste.", "detalhes": str(e)}), 500

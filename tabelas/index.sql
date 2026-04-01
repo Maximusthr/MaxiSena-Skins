@@ -2,7 +2,6 @@
 CREATE INDEX idx_skins_categoria ON skins(categoria);
 
 -- busca por nome das skins
--- 
 CREATE INDEX idx_skins_nome ON skins(nome);
 
 -- Chaves Estrangeiras
