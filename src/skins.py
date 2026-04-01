@@ -3,7 +3,7 @@ from src.database import db
 from src.models import Skin
 from sqlalchemy import text
 
-# Cria o Blueprint para as rotas do stock de skins
+# Cria o Blueprint para as rotas do estoque de skins
 skins_bp = Blueprint('skins', __name__)
 
 # CREATE skins
@@ -138,7 +138,7 @@ def filtrar_skins():
 
     query = Skin.query
 
-    # Aplica os filtros de forma dinâmica (apenas se o utilizador os enviou na URL)
+    # filtros de forma dinâmica
     if nome_pesquisa:
         query = query.filter(Skin.nome.ilike(f"%{nome_pesquisa}%"))
     if categoria:
@@ -198,7 +198,6 @@ def aplicar_desconto():
         return jsonify({"erro": "Categoria e percentual são obrigatórios."}), 400
         
     try:
-        # AQUI A MÁGICA ACONTECE: O Python manda o banco executar a Procedure!
         query = text("CALL sp_aplicar_desconto_categoria(:cat, :perc)")
         db.session.execute(query, {"cat": categoria, "perc": percentual})
         db.session.commit()
