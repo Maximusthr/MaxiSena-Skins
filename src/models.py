@@ -8,6 +8,7 @@ class Cliente(db.Model):
     nome = db.Column(db.String(40), nullable=False)
     cpf = db.Column(db.String(15), unique=True, nullable=False)
     email = db.Column(db.String(40), nullable=False)
+    senha = db.Column(db.String(100), nullable=False)
     cidade = db.Column(db.String(40), nullable=False)
     telefone = db.Column(db.String(15), nullable=False)
     torce_flamengo = db.Column(db.Boolean, default=False)
@@ -21,6 +22,8 @@ class Vendedor(db.Model):
     
     id_vendedor = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(40), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    senha = db.Column(db.String(100), nullable=False)              
 
     # Vendedor faz várias vendas (aponta para tabela compra)
     compras = db.relationship('Compra', backref='vendedor', lazy=True)

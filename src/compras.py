@@ -83,7 +83,7 @@ def registrar_compra():
             status_confirmacao=dados_pagamento.get('status_confirmacao', 'Pendente')
         )
         db.session.add(novo_pagamento)
-        db.session.flush() # Manda pro banco gerar o ID, mas não commita definitivamente ainda
+        db.session.flush() # Manda pro banco gerar o ID, mas não commita definitivamente ainda 
 
         # compra
         nova_compra = Compra(

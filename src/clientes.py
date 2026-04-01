@@ -14,6 +14,7 @@ def cadastrar_cliente():
         nome=dados.get('nome'),
         cpf=dados.get('cpf'),
         email=dados.get('email'),
+        senha=dados.get('senha'),
         cidade=dados.get('cidade'),
         telefone=dados.get('telefone'),
         torce_flamengo=dados.get('torce_flamengo', False),      # Se não enviarem, assume False
@@ -71,6 +72,7 @@ def atualizar_cliente(id):
     cliente.nome = dados.get('nome', cliente.nome)
     cliente.cpf = dados.get('cpf', cliente.cpf)
     cliente.email = dados.get('email', cliente.email)
+    cliente.senha = dados.get('email', cliente.senha)
     cliente.cidade = dados.get('cidade', cliente.cidade)
     cliente.telefone = dados.get('telefone', cliente.telefone)
     cliente.torce_flamengo = dados.get('torce_flamengo', cliente.torce_flamengo)
