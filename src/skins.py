@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from src.database import db
 from src.models import Skin
+from sqlalchemy import text
 
 # Cria o Blueprint para as rotas do stock de skins
 skins_bp = Blueprint('skins', __name__)
@@ -184,3 +185,26 @@ def verificar_estoque_baixo():
         "total_itens_em_alerta": len(lista_retorno), 
         "produtos": lista_retorno
     }), 200
+
+
+# desconto
+@skins_bp.route('/aplicar-desconto', methods=['POST'])
+def aplicar_desconto():
+    dados = request.get_json()
+    categoria = dados.get('categoria')
+    percentual = dados.get('percentual')
+    
+    if not categoria or percentual is None:
+        return jsonify({"erro": "Categoria e percentual são obrigatórios."}), 400
+        
+    try:
+        # AQUI A MÁGICA ACONTECE: O Python manda o banco executar a Procedure!
+        query = text("CALL sp_aplicar_desconto_categoria(:cat, :perc)")
+        db.session.execute(query, {"cat": categoria, "perc": percentual})
+        db.session.commit()
+        
+        return jsonify({"mensagem": f"Sucesso! Desconto de {percentual}% aplicado na categoria {categoria}."}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"erro": "Falha ao executar a Procedure.", "detalhes": str(e)}), 500
