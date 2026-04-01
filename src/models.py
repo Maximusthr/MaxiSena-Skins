@@ -7,7 +7,7 @@ class Cliente(db.Model):
     id_cliente = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(40), nullable=False)
     cpf = db.Column(db.String(15), unique=True, nullable=False)
-    email = db.Column(db.String(40), nullable=False)
+    email = db.Column(db.String(40), unique=True, nullable=False)
     senha = db.Column(db.String(100), nullable=False)
     cidade = db.Column(db.String(40), nullable=False)
     telefone = db.Column(db.String(15), nullable=False)
