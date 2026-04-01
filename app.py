@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 from flask import Flask, render_template
 from flask_migrate import Migrate
 from dotenv import load_dotenv
@@ -48,10 +48,43 @@ def pagina_inicial():
 #def index():
     #return jsonify({"mensagem": "API do Mercado CS2 rodando com sucesso!"})
 
-# Cria as tabelas automaticamente assim que o app rodar pela primeira vez
+# Cria as tabelas automaticamente
 with app.app_context():
-    db.create_all()               # Cria as tabelas se não existirem
-    popular_banco_se_vazio(db)    # Injeta os dados se estiver vazio
+    db.create_all()               
+    popular_banco_se_vazio(db)    
+
+@app.route('/login', methods=['POST'])
+def fazer_login():
+    dados = request.get_json()
+    email = dados.get('email')
+    senha = dados.get('senha')
+    tipo_conta = dados.get('tipo')
+
+    if not email or not senha or not tipo_conta:
+        return jsonify({"erro": "Email, senha e tipo de conta são obrigatórios."}), 400
+
+    if tipo_conta == 'cliente':
+        usuario = Cliente.query.filter_by(email=email, senha=senha).first()
+        if usuario:
+            return jsonify({
+                "mensagem": "Login aprovado!",
+                "id": usuario.id_cliente,
+                "nome": usuario.nome,
+                "cpf": usuario.cpf,
+                "role": "cliente"
+            }), 200
+
+    elif tipo_conta == 'vendedor':
+        usuario = Vendedor.query.filter_by(email=email, senha=senha).first()
+        if usuario:
+            return jsonify({
+                "mensagem": "Login admin aprovado!",
+                "id": usuario.id_vendedor,
+                "nome": usuario.nome,
+                "role": "vendedor"
+            }), 200
+
+    return jsonify({"erro": "Credenciais inválidas!"}), 401
 
 if __name__ == '__main__':
     app.run(debug=True)

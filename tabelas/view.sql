@@ -14,3 +14,17 @@ JOIN pagamentos p ON c.id_pagamento = p.id_pagamento
 ORDER BY c.data_compra DESC;
 
 -- SELECT * FROM vw_relatorio_vendas;
+
+CREATE OR REPLACE VIEW vw_estoque_critico AS
+SELECT 
+    id_skins,
+    nome,
+    tipo,
+    categoria,
+    estoque,
+    valor
+FROM skins
+WHERE estoque < 5
+ORDER BY estoque ASC;
+
+-- Como usar: SELECT * FROM vw_estoque_critico;

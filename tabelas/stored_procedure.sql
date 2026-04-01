@@ -10,8 +10,6 @@ BEGIN
     SET valor = valor - (valor * (p_percentual_desconto / 100.0))
     WHERE categoria ILIKE p_categoria;
     
-    COMMIT;
-    
     RAISE NOTICE 'Desconto de %%% aplicado com sucesso na categoria %.', p_percentual_desconto, p_categoria;
 END;
 $$;
